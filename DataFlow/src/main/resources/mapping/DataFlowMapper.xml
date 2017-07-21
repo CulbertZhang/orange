@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.orange.dataflow.dao.IDataFlowMapper">
+	
+	<insert id="insertOrderInfo" parameterType="com.orange.dataflow.bean.OrderInfoBean">
+	INSERT INTO TRANSACTION_FLOW  (
+	       ORDER_ID,
+	       MOBILE,
+	       DATA_TYPE,
+	       PACKAGE,
+	       ACCOUNT,
+	       STATE,
+	       ORDER_TIME) 
+	 VALUES(
+	 #{orderInfoBean.orderId},
+	 #{orderInfoBean.mobile},
+	 #{orderInfoBean.dateType},
+	 #{orderInfoBean.packageId},
+	 #{orderInfoBean.account},
+	 #{orderInfoBean.state},
+	 #{orderInfoBean.orderTime})
+	</insert>
+	
+	<update id="upOrderInfo" parameterType="com.orange.dataflow.bean.OrderInfoBean" >
+		UPDATE TRANSACTION_FLOW
+		SET  ERROR_CODE=#{orderInfoBean.errorCode}
+		<if test="orderInfoBean.taskId!=null">
+		   , TASK_ID=#{orderInfoBean.taskId}
+		</if>
+		<if test="orderInfoBean.state!=null">
+		   , STATE=#{orderInfoBean.state}
+		</if>
+		 WHERE ORDER_ID = #{orderInfoBean.orderId}
+	</update>
+	
+	<update id="upOrderInfoByTaskId" parameterType="com.orange.dataflow.bean.OrderInfoBean" >
+		UPDATE TRANSACTION_FLOW
+		SET  UDPATE_TIME=#{orderInfoBean.udpateTime},
+		STATE=#{orderInfoBean.state}
+		 WHERE TASK_ID = #{orderInfoBean.taskId}
+	</update>
+	
+	<update id="upOrderInfoById" parameterType="com.orange.dataflow.bean.OrderInfoBean" >
+		UPDATE TRANSACTION_FLOW
+		SET  ERROR_CODE=#{orderInfoBean.errorCode}
+		<if test="orderInfoBean.taskId!=null">
+		   , TASK_ID=#{orderInfoBean.taskId}
+		</if>
+		 WHERE ID = #{orderInfoBean.id}
+	</update>
+	
+	<select id="queryOrderListById" parameterType="com.orange.dataflow.bean.OrderInfoBean"
+		resultType="com.orange.dataflow.bean.OrderInfoBean">
+		SELECT ID AS id
+		  FROM TRANSACTION_FLOW
+		 WHERE ORDER_ID=#{orderInfoBean.orderId}
+	</select>
+	
+	<select id="queryUserInfo" parameterType="String"
+		resultType="com.orange.dataflow.bean.UserInfoBean">
+		SELECT ACCOUNT AS account,
+			   CIPHER_CODE AS cipherCode,
+			   RETURN_URL AS returnUrl
+		  FROM TRANSCATION_CONFIG
+		 WHERE ACCOUNT=#{account}
+		 
+	</select>
+	
+	<select id="queryAccountByTaskId" parameterType="String"
+		resultType="String">
+		SELECT T.ACCOUNT
+		  FROM TRANSACTION_FLOW T
+		  WHERE 
+		  T.TASK_ID=#{taskId}
+		 
+	</select>
+	
+	<select id="queryUrlByAccount" parameterType="String"
+		resultType="String">
+		SELECT T.RETURN_URL
+		  FROM TRANSCATION_CONFIG T
+		  WHERE 
+		  T.ACCOUNT=#{account}
+		 
+	</select>
+</mapper>

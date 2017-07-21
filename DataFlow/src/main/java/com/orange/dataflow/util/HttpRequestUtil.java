@@ -1,6 +1,8 @@
 package com.orange.dataflow.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -210,11 +212,12 @@ public class HttpRequestUtil {
 			conn.setRequestProperty("connection", "Keep-Alive");
 			conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
+			 conn.setRequestProperty("contentType", "UTF-8");  
 			conn.connect();
 
 			// 获取URLConnection对象对应的输出流
 			out = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
+			
 			// 发送请求参数
 			out.write(param);
 			// flush输出流的缓冲
@@ -245,9 +248,70 @@ public class HttpRequestUtil {
 		return result;
 	}
 
+	public static String sendPost(String url, String param) {
+		String urlPath = new String(url);
+		StringBuffer sb2 = new StringBuffer();
+		try {
+			// 建立连接
+			URL urls = new URL(url);
+			HttpURLConnection httpConn = (HttpURLConnection) urls.openConnection();
+			// 设置参数
+			httpConn.setDoOutput(true); // 需要输出
+			httpConn.setDoInput(true); // 需要输入
+			httpConn.setUseCaches(false); // 不允许缓存
+			httpConn.setRequestMethod("POST"); // 设置POST方式连接
+			// 设置请求属性
+			httpConn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+			httpConn.setRequestProperty("Connection", "Keep-Alive");// 维持长连接
+			httpConn.setRequestProperty("Charset", "UTF-8");
+			
+			// 连接,也可以不用明文connect，使用下面的httpConn.getOutputStream()会自动connect
+			httpConn.connect();
+			// 建立输入流，向指向的URL传入参数
+			DataOutputStream dos = new DataOutputStream(httpConn.getOutputStream());
+			System.out.println("--param--"+param.trim());
+			dos.writeBytes(param);
+			dos.flush();
+			dos.close();
+			// 获得响应状态
+			int resultCode = httpConn.getResponseCode();
+			
+			if (HttpURLConnection.HTTP_OK == resultCode) {
+				String readLine = new String();
+				BufferedReader responseReader = new BufferedReader(
+						new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+				while ((readLine = responseReader.readLine()) != null) {
+					sb2.append(readLine).append("\n");
+				}
+				responseReader.close();
+				System.out.println(sb2.toString());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return sb2.toString();
+	}
+	
+	/**
+     * 解读 inputsream 字节流
+     * @param args
+     */
+    public static byte[] readInputStream(InputStream is) throws Exception {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len = 0;
+        while ((len = is.read(buffer)) != -1) {
+            outStream.write(buffer, 0, len);
+        }
+        byte[] data = outStream.toByteArray();//网页的二进制数据        
+        outStream.close();
+        is.close();
+        return data;
+    }
 	public static String getSign(String params) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		String key = "88172d1116e0440e964af71ddc79797c";
-		String para = "account=jinankunshi&mobile=13605310990&package=YD10";
+		String para = "account=jinankunshi&cmpackage=YD10&mobile=13573151855,13864196813";
 		// para= para.toLowerCase()+"&key="+key;
 		para = para + "&key=" + key;
 		System.out.println("加密体-----" + para);
@@ -267,14 +331,25 @@ public class HttpRequestUtil {
 		 */
 
 		String url = "http://api.ucpaas.com/flux/api.aspx";
-		String para = "V=1.1&Action=flowRecharge&Account=jinankunshi&Mobile=13605310990&Package=YD10";
+		String para = "Action=chargeBat&V=1.1&Account=jinankunshi&Range=0&OutTradeNo=201707211817081112&Mobile=13573151855,13864196813&CMPackage=YD10&CUPackage=&CTPackage=";
 		String sign = getSign(para);
+		
 		System.out.println("签名字符串-----" + sign);
 		para = para + "&Sign=" + sign;
 		System.out.println("请求体-----" + para);
 
-		String sr = HttpRequestUtil.sendPost(url, para, false);
-		System.out.println(sr);
+		String sr = HttpRequestUtil.sendPost(url, para);
+		System.out.println("sr体-----" + sr);
+		/*String key = "88172d1116e0440e964af71ddc79797c";
+		//String para = "account=jinankunshi&mobile=13605310990&package=YD10";
+		
+		//String key = "88172d1116e0440e964af71ddc00000c";
+		
+		String para = "account=jinankunshi&outtradeno=201707211517080001";
+		para = para + "&key=" + key;
+		System.out.println("加密体-----" + para);
+
+		System.out.println( MD5Util.getMD5ByX32(para));*/
 	}
 
 }
