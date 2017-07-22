@@ -9,6 +9,9 @@
                         http://www.springframework.org/schema/context/spring-context-3.1.xsd    
                         http://www.springframework.org/schema/mvc    
                         http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+	
+	<!-- 启用注解驱动 -->
+	<mvc:annotation-driven />
 	<!-- 自动扫描 -->
 	<context:component-scan base-package="com.orange.dataflow" />
 	<!-- 引入配置文件 -->
