@@ -67,56 +67,53 @@ public class DataFlowController {
 	 * @return
 	 */
 	@RequestMapping(value = "getState.do")
-	public void getState(HttpServletRequest request, HttpServletResponse response) throws Exception{
-		
-		String taskID =request.getParameter("TaskID");// 任务
-		String mobile =request.getParameter("Mobile");// 手机号
+	public void getState(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		String taskID = request.getParameter("TaskID");// 任务
+		String mobile = request.getParameter("Mobile");// 手机号
 		String status = request.getParameter("Status");// 状态
-		String reportTime =request.getParameter("ReportTime");// 时间
+		String reportTime = request.getParameter("ReportTime");// 时间
 		String reportCode = request.getParameter("ReportCode");// 代码说明
 		String outTradeNo = request.getParameter("OutTradeNo");// 订单号
-		
-		Map<String ,String> map=new HashMap<String ,String>();
+
+		Map<String, String> map = new HashMap<String, String>();
 		map.put("taskID", taskID);
 		map.put("mobile", mobile);
 		map.put("status", status);
 		map.put("reportTime", reportTime);
 		map.put("reportCode", reportCode);
 		map.put("outTradeNo", outTradeNo);
-		boolean flag=dataFlowService.getMsg(map);
-		
-		if(flag){
-			try {
-				
-				//JSONObject jsonObject = JSONObject.fromObject(outMap);
-				response.setContentType("text/html; charset=utf-8"); 
+
+		try {
+			boolean flag = dataFlowService.getMsg(map);
+
+			if (flag) {
+
+				response.setContentType("text/html; charset=utf-8");
 				PrintWriter out = response.getWriter();
-				
-				//out.write(jsonObject.toString());
+
 				out.write("ok");
 				out.flush();
 				out.close();
-				
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}else{
-			try {
-				
-				//JSONObject jsonObject = JSONObject.fromObject(outMap);
-				response.setContentType("text/html; charset=utf-8"); 
+
+			} else {
+
+				response.setContentType("text/html; charset=utf-8");
 				PrintWriter out = response.getWriter();
-				
-				//out.write(jsonObject.toString());
+
 				out.write("false");
 				out.flush();
 				out.close();
-				
-				
-			} catch (IOException e) {
-				e.printStackTrace();
+
 			}
+		} catch (Exception e) {
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+
+			out.write("false");
+			out.flush();
+			out.close();
 		}
+
 	}
 }
