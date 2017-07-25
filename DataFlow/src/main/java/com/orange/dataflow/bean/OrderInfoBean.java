@@ -15,7 +15,7 @@ public class OrderInfoBean implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String id;
+	private int id;
 	private String orderId;
 	private String mobile;
 	private int dateType;
@@ -93,10 +93,10 @@ public class OrderInfoBean implements Serializable {
 	public void setDateType(int dateType) {
 		this.dateType = dateType;
 	}
-	public String getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	

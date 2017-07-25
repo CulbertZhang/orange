@@ -15,7 +15,7 @@ public interface IDataFlowMapper {
 	 * 订单表数据插入
 	 * @param bean
 	 */
-	public void insertOrderInfo(@Param("orderInfoBean")OrderInfoBean orderInfoBean);
+	public int insertOrderInfo(@Param("orderInfoBean")OrderInfoBean orderInfoBean);
 	
 	/**
 	 * 查询订单

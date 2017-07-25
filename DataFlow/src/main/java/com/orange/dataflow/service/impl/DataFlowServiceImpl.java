@@ -76,10 +76,9 @@ public class DataFlowServiceImpl implements IDataFlowService {
 			orderInfoBean.setOrderTime(new Date());
 			// 下单数据存储
 			dataFlowMapper.insertOrderInfo(orderInfoBean);
-
 			if (enSign.equals(sign)) {
 				// 验签成功
-				logger.info("---验签成功---");
+				logger.info("---flowRecharge验签成功---账户："+account);
 
 				String myParam = "account=jinankunshi&mobile=" + mobile + "&package=" + pckage;
 				myParam = myParam + "&key=" + myKey;
@@ -91,14 +90,14 @@ public class DataFlowServiceImpl implements IDataFlowService {
 				para = para + "&Sign=" + mySign;
 
 				String resultMsg = HttpRequestUtil.sendPost(url, para);
-				logger.info("---resultMsg---" + resultMsg);
+				logger.info("---flowRecharge--resultMsg---" + resultMsg);
 				JSONObject returnJsonObj = JSONObject.fromObject(resultMsg);
 				if ("0".equals(returnJsonObj.get("Code"))) {
 
 					orderInfoBean.setTaskId(returnJsonObj.get("TaskID").toString());
 					orderInfoBean.setState(1);
 					orderInfoBean.setErrorCode(returnJsonObj.get("Code").toString());
-					dataFlowMapper.upOrderInfo(orderInfoBean);
+					dataFlowMapper.upOrderInfoById(orderInfoBean);
 					outMap.put("TaskID", returnJsonObj.get("TaskID").toString());
 				}
 				outMap.put("Code", returnJsonObj.get("Code").toString());
@@ -112,7 +111,7 @@ public class DataFlowServiceImpl implements IDataFlowService {
 			}
 			orderInfoBean.setTaskId(outMap.get("TaskID"));
 			orderInfoBean.setErrorCode(outMap.get("Code"));
-			dataFlowMapper.upOrderInfo(orderInfoBean);
+			dataFlowMapper.upOrderInfoById(orderInfoBean);
 			logger.info("---upOrderInfo更新成功---");
 		} else {
 			outMap.put("Code", "013");
@@ -292,7 +291,7 @@ public class DataFlowServiceImpl implements IDataFlowService {
 			
 			if(enSign.equals(sign)){
 				//验签成功
-				logger.info("---验签成功---");
+				logger.info("---验签成功---account："+account);
 				
 				String myParam="account=jinankunshi&type="+type;
 				myParam = myParam + "&key=" + myKey;
@@ -382,7 +381,7 @@ public class DataFlowServiceImpl implements IDataFlowService {
 		
 		if(enSign.equals(sign)){
 			//验签成功
-			logger.info("---验签成功---");
+			logger.info("---验签成功---account："+account);
 			
 			String myParam="account=jinankunshi&count="+count;
 			myParam = myParam + "&key=" + myKey;
@@ -509,36 +508,32 @@ public class DataFlowServiceImpl implements IDataFlowService {
 	@Override
 	public boolean getMsg(Map<String, String> map) {
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
-		Date date;
 		try {
-			//上游数据存库
-			date = sdf.parse(URLDecoder.decode(map.get("reportTime")));
 			OrderInfoBean orderInfoBean=new OrderInfoBean();
 			orderInfoBean.setTaskId(URLDecoder.decode(map.get("taskID")));
-			orderInfoBean.setUdpateTime(date);
+			orderInfoBean.setUdpateTime(new Date());
 			orderInfoBean.setState(Integer.parseInt(map.get("status")));
 			dataFlowMapper.upOrderInfoByTaskId(orderInfoBean);
-			
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			return false;
-		} 
+		}
 		
 		//发送下游状态
 		String account=dataFlowMapper.queryAccountByTaskId(map.get("taskID"));
-		
 		String returnUrl=dataFlowMapper.queryUrlByAccount(account);
 		JSONObject returnJsonObj = JSONObject.fromObject(map);
 		String resultMsg=HttpRequestUtil.sendPost(returnUrl, returnJsonObj.toString());
-		
+		logger.info("---回调resultMsg---"+resultMsg);
 		//下游反馈状态存储
 		if(resultMsg.contains("ok")){
+			logger.info("---下游反馈---ok");
 			OrderInfoBean orderInfoBean=new OrderInfoBean();
 			orderInfoBean.setTaskId(URLDecoder.decode(map.get("taskID")));
 			orderInfoBean.setState(2);
 			dataFlowMapper.upOrderInfoByTaskId(orderInfoBean);
 			return true;
 		}else{
+			logger.info("---下游反馈---no");
 			OrderInfoBean orderInfoBean=new OrderInfoBean();
 			orderInfoBean.setTaskId(URLDecoder.decode(map.get("taskID")));
 			orderInfoBean.setState(3);
@@ -546,6 +541,27 @@ public class DataFlowServiceImpl implements IDataFlowService {
 			
 			return false;
 		}
+		
+	}
+
+	@Override
+	public void other(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			Map<String, Object> outMap = new HashMap<String, Object>();
+			outMap.put("Code", "001");
+			outMap.put("Message", "参数错误");
+			JSONObject jsonObject = JSONObject.fromObject(outMap);
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+
+			out.write(jsonObject.toString());
+			out.flush();
+			out.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		
 	}
 

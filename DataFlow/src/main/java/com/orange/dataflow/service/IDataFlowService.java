@@ -19,5 +19,7 @@ public interface IDataFlowService {
 	
 	public void getOrder(HttpServletRequest request, HttpServletResponse response);
 	
+	public void other(HttpServletRequest request, HttpServletResponse response);
+	
 	public boolean getMsg(Map<String,String> map);
 }

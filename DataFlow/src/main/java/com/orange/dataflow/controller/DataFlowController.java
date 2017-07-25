@@ -1,6 +1,5 @@
 package com.orange.dataflow.controller;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +39,7 @@ public class DataFlowController {
 	@RequestMapping(value = "rechargeFlow")
 	public void rechargeFlow(HttpServletRequest request, HttpServletResponse response) throws Exception{
 		
-		 String action = request.getParameter("Action");//宽带信息编码
+		 String action = request.getParameter("Action");//编码
 		 
 		 if("flowRecharge".equals(action)){//单号码充值
 			 
@@ -55,6 +54,8 @@ public class DataFlowController {
 			 dataFlowService.getReports(request,response);
 		 }else if("getOrder".equals(action)){//订单查询
 			 dataFlowService.getOrder(request,response);
+		 }else {//参数异常
+			 dataFlowService.other(request,response);
 		 }
 
 	}
@@ -69,13 +70,15 @@ public class DataFlowController {
 	@RequestMapping(value = "getState.do")
 	public void getState(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+		
 		String taskID = request.getParameter("TaskID");// 任务
 		String mobile = request.getParameter("Mobile");// 手机号
 		String status = request.getParameter("Status");// 状态
 		String reportTime = request.getParameter("ReportTime");// 时间
 		String reportCode = request.getParameter("ReportCode");// 代码说明
 		String outTradeNo = request.getParameter("OutTradeNo");// 订单号
-
+		logger.info("--回调开始---outTradeNo："+outTradeNo);
+		
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("taskID", taskID);
 		map.put("mobile", mobile);
@@ -86,9 +89,8 @@ public class DataFlowController {
 
 		try {
 			boolean flag = dataFlowService.getMsg(map);
-
 			if (flag) {
-
+				logger.info("--回调返回---ok：");
 				response.setContentType("text/html; charset=utf-8");
 				PrintWriter out = response.getWriter();
 
@@ -97,7 +99,7 @@ public class DataFlowController {
 				out.close();
 
 			} else {
-
+				logger.info("--回调返回---false：");
 				response.setContentType("text/html; charset=utf-8");
 				PrintWriter out = response.getWriter();
 
@@ -107,6 +109,7 @@ public class DataFlowController {
 
 			}
 		} catch (Exception e) {
+			logger.info("--异常返回---false：");
 			response.setContentType("text/html; charset=utf-8");
 			PrintWriter out = response.getWriter();
 

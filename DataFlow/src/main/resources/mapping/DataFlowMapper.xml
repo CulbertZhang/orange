@@ -3,7 +3,7 @@
 
 <mapper namespace="com.orange.dataflow.dao.IDataFlowMapper">
 	
-	<insert id="insertOrderInfo" parameterType="com.orange.dataflow.bean.OrderInfoBean">
+	<insert id="insertOrderInfo" parameterType="com.orange.dataflow.bean.OrderInfoBean"  useGeneratedKeys="true" keyProperty="orderInfoBean.id" >
 	INSERT INTO TRANSACTION_FLOW  (
 	       ORDER_ID,
 	       MOBILE,
@@ -46,6 +46,9 @@
 		SET  ERROR_CODE=#{orderInfoBean.errorCode}
 		<if test="orderInfoBean.taskId!=null">
 		   , TASK_ID=#{orderInfoBean.taskId}
+		</if>
+		<if test="orderInfoBean.state!=null">
+		   , STATE=#{orderInfoBean.state}
 		</if>
 		 WHERE ID = #{orderInfoBean.id}
 	</update>
