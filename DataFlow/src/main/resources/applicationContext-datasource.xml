@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:b="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd 
+                           http://www.springframework.org/schema/aop 
+                           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:property-placeholder location="classpath:datasource.properties"/>
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${druid.jdbc.url}" />
+		<property name="username" value="${druid.jdbc.user}" />
+		<property name="password" value="${druid.jdbc.password}" />
+		
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${druid.jdbc.initialSize}" />
+		<property name="minIdle" value="${druid.jdbc.minIdle}" />
+		<property name="maxActive" value="${druid.jdbc.maxActive}" />
+		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${druid.jdbc.maxWait}" />
+		
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.jdbc.timeBetweenEvictionRunsMillis}" />
+		
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.jdbc.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="${druid.jdbc.validationQuery}" />
+		<property name="testWhileIdle" value="${druid.jdbc.testWhileIdle}" />
+		<property name="testOnBorrow" value="${druid.jdbc.testOnBorrow}" />
+		<property name="testOnReturn" value="${druid.jdbc.testOnReturn}" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小， -->
+		<property name="poolPreparedStatements" value="${druid.jdbc.poolPreparedStatements}" />
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="${druid.jdbc.maxPoolPreparedStatementPerConnectionSize}" />
+		<!-- 配置监控统计拦截的filters及日志输出 -->
+		<property name="filters" value="log4j" />
+		<property name="proxyFilters">
+		<list>
+			<ref bean="stat-filter" />
+			<ref bean="log-filter"/>
+		</list>
+	</property>
+	</bean>
+	
+	<!-- 慢SQL记录配置及合并SQL配置 begin -->
+	<bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+		<property name="slowSqlMillis" value="1000" />
+		<property name="logSlowSql" value="true" />
+		<property name="mergeSql" value="true" />
+	</bean>
+	<!-- 慢SQL记录配置及合并SQL配置 ended -->
+	
+	<!-- 定制化日志输出，输出可执行的SQL begin -->
+	<bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
+		<property name="resultSetLogEnabled" value="false" />
+		<property name="statementExecutableSqlLogEnable" value="true" />
+	</bean>
+	<!-- 定制化日志输出，输出可执行的SQL ended -->
+</beans>
